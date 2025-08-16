@@ -1,234 +1,154 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../../core/app_export.dart';
-import '../../../theme/app_theme.dart';
 
 class QuestionDisplayWidget extends StatelessWidget {
   final Map<String, dynamic> question;
-  final int currentQuestionIndex;
-  final int totalQuestions;
   final String? selectedAnswer;
   final Function(String) onAnswerSelected;
 
   const QuestionDisplayWidget({
     Key? key,
     required this.question,
-    required this.currentQuestionIndex,
-    required this.totalQuestions,
-    required this.selectedAnswer,
+    this.selectedAnswer,
     required this.onAnswerSelected,
   }) : super(key: key);
 
+  void _onOptionTap(String option) {
+    HapticFeedback.lightImpact();
+    onAnswerSelected(option);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<String> options = (question['options'] as List).cast<String>();
-    final String questionType = question['type'] ?? 'single';
+    final options = (question['options'] as List).cast<String>();
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.shadowLight,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Question Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
-                decoration: BoxDecoration(
-                  color:
-                      AppTheme.lightTheme.primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'Question ${currentQuestionIndex + 1} of $totalQuestions',
-                  style: AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
-                    color: AppTheme.lightTheme.primaryColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
-                decoration: BoxDecoration(
-                  color: questionType == 'multiple'
-                      ? AppTheme.accentWarning.withValues(alpha: 0.1)
-                      : AppTheme.accentSuccess.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  questionType == 'multiple'
-                      ? 'Multiple Choice'
-                      : 'Single Choice',
-                  style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                    color: questionType == 'multiple'
-                        ? AppTheme.accentWarning
-                        : AppTheme.accentSuccess,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          SizedBox(height: 3.h),
-
-          // Question Text
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(4.w),
-            decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.surface,
-              border: Border.all(
-                color: AppTheme.borderLight,
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              question['question'] ?? '',
-              style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
-                fontSize: 16.sp,
-                height: 1.5,
-                color: AppTheme.textPrimaryLight,
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(4.w),
+          decoration: BoxDecoration(
+            color: AppTheme.lightTheme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppTheme.lightTheme.colorScheme.outline
+                  .withValues(alpha: 0.2),
             ),
           ),
-
-          SizedBox(height: 3.h),
-
-          // Answer Options
-          Text(
-            'Select your answer:',
-            style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
-              color: AppTheme.textSecondaryLight,
-              fontWeight: FontWeight.w500,
+          child: Text(
+            question['question'] as String,
+            style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
+              color: AppTheme.lightTheme.colorScheme.onSurface,
+              height: 1.4,
             ),
           ),
+        ),
+        SizedBox(height: 3.h),
+        ...options.asMap().entries.map((entry) {
+          final index = entry.key;
+          final option = entry.value;
+          final optionLabel = String.fromCharCode(65 + index); // A, B, C, D
+          final isSelected = selectedAnswer == option;
 
-          SizedBox(height: 2.h),
-
-          ...options.asMap().entries.map((entry) {
-            final index = entry.key;
-            final option = entry.value;
-            final optionLabel = String.fromCharCode(65 + index); // A, B, C, D
-            final isSelected = selectedAnswer == option;
-
-            return Container(
-              margin: EdgeInsets.only(bottom: 2.h),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => onAnswerSelected(option),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(3.w),
-                    decoration: BoxDecoration(
+          return Container(
+            margin: EdgeInsets.only(bottom: 2.h),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _onOptionTap(option),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(4.w),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppTheme.lightTheme.colorScheme.primary
+                            .withValues(alpha: 0.1)
+                        : AppTheme.lightTheme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
                       color: isSelected
-                          ? AppTheme.lightTheme.primaryColor
-                              .withValues(alpha: 0.1)
-                          : AppTheme.lightTheme.colorScheme.surface,
-                      border: Border.all(
-                        color: isSelected
-                            ? AppTheme.lightTheme.primaryColor
-                            : AppTheme.borderLight,
-                        width: isSelected ? 2 : 1,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
+                          ? AppTheme.lightTheme.colorScheme.primary
+                          : AppTheme.lightTheme.colorScheme.outline
+                              .withValues(alpha: 0.3),
+                      width: isSelected ? 2 : 1,
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8.w,
+                        height: 8.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isSelected
+                              ? AppTheme.lightTheme.colorScheme.primary
+                              : Colors.transparent,
+                          border: Border.all(
                             color: isSelected
-                                ? AppTheme.lightTheme.primaryColor
-                                : Colors.transparent,
-                            border: Border.all(
-                              color: isSelected
-                                  ? AppTheme.lightTheme.primaryColor
-                                  : AppTheme.borderLight,
-                              width: 2,
-                            ),
-                            shape: questionType == 'multiple'
-                                ? BoxShape.rectangle
-                                : BoxShape.circle,
-                            borderRadius: questionType == 'multiple'
-                                ? BorderRadius.circular(4)
-                                : null,
+                                ? AppTheme.lightTheme.colorScheme.primary
+                                : AppTheme.lightTheme.colorScheme.outline,
+                            width: 2,
                           ),
-                          child: isSelected
-                              ? Icon(
-                                  questionType == 'multiple'
-                                      ? Icons.check
-                                      : Icons.circle,
-                                  color: Colors.white,
+                        ),
+                        child: isSelected
+                            ? Center(
+                                child: CustomIconWidget(
+                                  iconName: 'check',
+                                  color:
+                                      AppTheme.lightTheme.colorScheme.onPrimary,
                                   size: 16,
-                                )
-                              : null,
+                                ),
+                              )
+                            : null,
+                      ),
+                      SizedBox(width: 3.w),
+                      Container(
+                        width: 8.w,
+                        height: 8.w,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppTheme.lightTheme.colorScheme.primary
+                              : AppTheme.lightTheme.colorScheme.outline
+                                  .withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
                         ),
-                        SizedBox(width: 3.w),
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? AppTheme.lightTheme.primaryColor
-                                : AppTheme.borderLight.withValues(alpha: 0.3),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              optionLabel,
-                              style: AppTheme.lightTheme.textTheme.titleSmall
-                                  ?.copyWith(
-                                color: isSelected
-                                    ? Colors.white
-                                    : AppTheme.textSecondaryLight,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 3.w),
-                        Expanded(
+                        child: Center(
                           child: Text(
-                            option,
-                            style: AppTheme.lightTheme.textTheme.bodyMedium
+                            optionLabel,
+                            style: AppTheme.lightTheme.textTheme.titleSmall
                                 ?.copyWith(
                               color: isSelected
-                                  ? AppTheme.lightTheme.primaryColor
-                                  : AppTheme.textPrimaryLight,
-                              fontWeight: isSelected
-                                  ? FontWeight.w500
-                                  : FontWeight.w400,
+                                  ? AppTheme.lightTheme.colorScheme.onPrimary
+                                  : AppTheme.lightTheme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(width: 3.w),
+                      Expanded(
+                        child: Text(
+                          option,
+                          style:
+                              AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
+                            color: AppTheme.lightTheme.colorScheme.onSurface,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            );
-          }).toList(),
-        ],
-      ),
+            ),
+          );
+        }).toList(),
+      ],
     );
   }
 }

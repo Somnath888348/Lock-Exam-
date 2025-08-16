@@ -8,93 +8,84 @@ class AppLogoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // App Logo Container
-        Container(
-          width: 20.w,
-          height: 20.w,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppTheme.primaryLight,
-                AppTheme.primaryVariantLight,
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 4.w),
+      child: Column(
+        children: [
+          Container(
+            width: 20.w,
+            height: 20.w,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppTheme.lightTheme.colorScheme.primary,
+                  AppTheme.lightTheme.colorScheme.primaryContainer,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(4.w),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.lightTheme.colorScheme.primary
+                      .withValues(alpha: 0.3),
+                  blurRadius: 12.0,
+                  offset: const Offset(0, 4),
+                ),
               ],
             ),
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primaryLight.withValues(alpha: 0.3),
-                blurRadius: 12.0,
-                offset: const Offset(0, 4),
+            child: Center(
+              child: CustomIconWidget(
+                iconName: 'security',
+                color: Colors.white,
+                size: 10.w,
               ),
-            ],
-          ),
-          child: Center(
-            child: CustomIconWidget(
-              iconName: 'school',
-              color: AppTheme.onPrimaryLight,
-              size: 10.w,
             ),
           ),
-        ),
-        SizedBox(height: 3.h),
-
-        // App Name
-        Text(
-          'SafeExam AI',
-          style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
-            color: AppTheme.textPrimaryLight,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.5,
-          ),
-        ),
-        SizedBox(height: 1.h),
-
-        // Subtitle
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
-          decoration: BoxDecoration(
-            color: AppTheme.primaryLight.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20.0),
-            border: Border.all(
-              color: AppTheme.primaryLight.withValues(alpha: 0.2),
-              width: 1.0,
+          SizedBox(height: 2.h),
+          Text(
+            'SafeExam AI Proctor',
+            style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: AppTheme.lightTheme.colorScheme.onSurface,
+              letterSpacing: -0.5,
             ),
+            textAlign: TextAlign.center,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CustomIconWidget(
-                iconName: 'verified_user',
-                color: AppTheme.primaryLight,
-                size: 16,
+          SizedBox(height: 1.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+            decoration: BoxDecoration(
+              color: AppTheme.lightTheme.colorScheme.primary
+                  .withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20.0),
+              border: Border.all(
+                color: AppTheme.lightTheme.colorScheme.primary
+                    .withValues(alpha: 0.2),
+                width: 1.0,
               ),
-              SizedBox(width: 2.w),
-              Text(
-                'Teacher Portal',
-                style: AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
-                  color: AppTheme.primaryLight,
-                  fontWeight: FontWeight.w600,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CustomIconWidget(
+                  iconName: 'verified',
+                  color: AppTheme.lightTheme.colorScheme.primary,
+                  size: 4.w,
                 ),
-              ),
-            ],
+                SizedBox(width: 1.w),
+                Text(
+                  'AI-Powered Security',
+                  style: AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
+                    color: AppTheme.lightTheme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        SizedBox(height: 1.h),
-
-        // Description
-        Text(
-          'Secure AI-powered examination platform',
-          style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-            color: AppTheme.textSecondaryLight,
-            fontWeight: FontWeight.w400,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

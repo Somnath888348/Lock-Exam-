@@ -20,10 +20,9 @@ class ExamTimerWidget extends StatefulWidget {
 }
 
 class _ExamTimerWidgetState extends State<ExamTimerWidget> {
-  late Timer _timer;
-  late int _remainingSeconds;
+  Timer? _timer;
+  int _remainingSeconds = 0;
   bool _isWarning = false;
-  bool _isCritical = false;
 
   @override
   void initState() {
@@ -32,56 +31,36 @@ class _ExamTimerWidgetState extends State<ExamTimerWidget> {
     _startTimer();
   }
 
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remainingSeconds > 0) {
         setState(() {
           _remainingSeconds--;
-          _updateWarningStates();
+          _isWarning = _remainingSeconds <= 300; // 5 minutes warning
         });
       } else {
-        _timer.cancel();
+        _timer?.cancel();
         widget.onTimeUp();
       }
     });
   }
 
-  void _updateWarningStates() {
-    final totalSeconds = widget.totalMinutes * 60;
-    final warningThreshold = totalSeconds * 0.2; // 20% remaining
-    final criticalThreshold = totalSeconds * 0.05; // 5% remaining
-
-    _isWarning = _remainingSeconds <= warningThreshold &&
-        _remainingSeconds > criticalThreshold;
-    _isCritical = _remainingSeconds <= criticalThreshold;
-  }
-
-  String _formatTime() {
-    final hours = _remainingSeconds ~/ 3600;
-    final minutes = (_remainingSeconds % 3600) ~/ 60;
-    final seconds = _remainingSeconds % 60;
+  String _formatTime(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    final secs = seconds % 60;
 
     if (hours > 0) {
-      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
     } else {
-      return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+      return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
     }
   }
 
-  Color _getTimerColor() {
-    if (_isCritical) {
-      return AppTheme.accentError;
-    } else if (_isWarning) {
-      return AppTheme.accentWarning;
-    } else {
-      return AppTheme.lightTheme.primaryColor;
-    }
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -89,48 +68,36 @@ class _ExamTimerWidgetState extends State<ExamTimerWidget> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        color: _isWarning
+            ? AppTheme.lightTheme.colorScheme.error.withValues(alpha: 0.1)
+            : AppTheme.lightTheme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _getTimerColor(),
-          width: _isCritical ? 2 : 1,
+          color: _isWarning
+              ? AppTheme.lightTheme.colorScheme.error
+              : AppTheme.lightTheme.colorScheme.outline,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: _getTimerColor().withValues(alpha: 0.2),
-            blurRadius: _isCritical ? 8 : 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           CustomIconWidget(
             iconName: 'timer',
-            color: _getTimerColor(),
-            size: 18,
+            color: _isWarning
+                ? AppTheme.lightTheme.colorScheme.error
+                : AppTheme.lightTheme.colorScheme.primary,
+            size: 20,
           ),
           SizedBox(width: 2.w),
           Text(
-            _formatTime(),
+            _formatTime(_remainingSeconds),
             style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-              color: _getTimerColor(),
+              color: _isWarning
+                  ? AppTheme.lightTheme.colorScheme.error
+                  : AppTheme.lightTheme.colorScheme.onSurface,
               fontWeight: FontWeight.w600,
-              fontSize: _isCritical ? 16.sp : 14.sp,
             ),
           ),
-          if (_isCritical) ...[
-            SizedBox(width: 1.w),
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: AppTheme.accentError,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ],
         ],
       ),
     );
